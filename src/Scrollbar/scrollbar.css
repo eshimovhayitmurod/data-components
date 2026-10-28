@@ -1,1 +1,236 @@
+@property --cs-start {
+   syntax: '<number>';
+   inherits: false;
+   initial-value: 0;
+}
+@property --cs-end {
+   syntax: '<number>';
+   inherits: false;
+   initial-value: 0;
+}
+@property --cs-active {
+   syntax: '<number>';
+   inherits: false;
+   initial-value: 0;
+}
+@keyframes cs-start {
+   from {
+      --cs-start: 1;
+   }
+   to {
+      --cs-start: 0;
+   }
+}
+@keyframes cs-end {
+   from {
+      --cs-end: 0;
+   }
+   to {
+      --cs-end: 1;
+   }
+}
+@keyframes cs-active {
+   from,
+   to {
+      --cs-active: 1;
+      --cs-events: auto;
+   }
+}
+@keyframes cs-fade-in {
+   from {
+      opacity: 0;
+   }
+   to {
+      opacity: 1;
+   }
+}
+@keyframes cs-fade-out {
+   from {
+      opacity: 1;
+   }
+   to {
+      opacity: 0;
+   }
+}
+:where(.cs-root) {
+   --cs-track-size: 14px;
+   --cs-thumb-inset: 3.5px;
+   --cs-thumb-inset-hover: 2px;
+   --cs-thumb-min: 20px;
+   --cs-thumb-radius: 999px;
+   --cs-thumb-color: rgb(128 128 128 / 0.55);
+   --cs-thumb-hover-color: rgb(128 128 128 / 0.85);
+   --cs-shadow-size: 16px;
+   --cs-shadow-color: rgb(0 0 0 / 0.18);
+   --cs-hide-delay: 600ms;
+   --cs-fade-duration: 200ms;
+}
+.cs-root {
+   position: relative;
+   isolation: isolate;
+   min-width: 0;
+   min-height: 0;
+   timeline-scope: --cs-y, --cs-x;
+}
+.cs-viewport {
+   position: relative;
+   width: 100%;
+   height: 100%;
+   overflow: auto;
+}
+.cs-track {
+   position: absolute;
+   z-index: 2;
+   pointer-events: none;
+   container-type: size;
+   transition: opacity var(--cs-fade-duration) ease;
+}
+.cs-track--y {
+   inset-block: 0;
+   inset-inline-end: 0;
+   inline-size: var(--cs-track-size);
+}
+.cs-track--x {
+   inset-inline: 0;
+   inset-block-end: 0;
+   block-size: var(--cs-track-size);
+}
+.cs-thumb {
+   --cs-events: none;
+   --cs-inset: var(--cs-thumb-inset);
+   cursor: pointer;
+   position: absolute;
+   box-sizing: border-box;
+   border-radius: var(--cs-thumb-radius);
+   background: var(--cs-thumb-color);
+   opacity: var(--cs-active);
+   pointer-events: var(--cs-events);
+   touch-action: none;
+   user-select: none;
+   transition:
+      background-color var(--cs-fade-duration) ease,
+      inset var(--cs-fade-duration) ease;
+   animation-timing-function: linear;
+   animation-fill-mode: both;
+}
+.cs-thumb:hover,
+.cs-thumb[data-dragging] {
+   --cs-inset: var(--cs-thumb-inset-hover);
+   background: var(--cs-thumb-hover-color);
+}
+.cs-thumb--y {
+   inset-inline: var(--cs-inset);
+   min-block-size: var(--cs-thumb-min);
+   inset-block-start: min(
+      calc(100% - var(--cs-start) * 100%),
+      calc(100% - var(--cs-thumb-min))
+   );
+   inset-block-end: calc(100% - var(--cs-end) * 100%);
+   animation-name: cs-start, cs-end, cs-active;
+   animation-timeline: --cs-y;
+   animation-range:
+      0% calc(100% + 100cqb),
+      calc(0% - 100cqb) 100%,
+      normal;
+}
+.cs-thumb--x {
+   inset-block: var(--cs-inset);
+   min-inline-size: var(--cs-thumb-min);
+   inset-inline-start: min(
+      calc(100% - var(--cs-start) * 100%),
+      calc(100% - var(--cs-thumb-min))
+   );
+   inset-inline-end: calc(100% - var(--cs-end) * 100%);
+   animation-name: cs-start, cs-end, cs-active;
+   animation-timeline: --cs-x;
+   animation-range:
+      0% calc(100% + 100cqi),
+      calc(0% - 100cqi) 100%,
+      normal;
+}
+.cs-root--auto_hide > .cs-track {
+   opacity: 0;
+   transition-delay: var(--cs-hide-delay);
+}
+.cs-root--auto_hide:is(:hover, :focus-within, [data-scrolling], [data-dragging])
+   > .cs-track {
+   opacity: 1;
+   transition-delay: 0s;
+}
+.cs-shadow {
+   position: absolute;
+   z-index: 1;
+   pointer-events: none;
+   opacity: 0;
+   animation-timing-function: linear;
+   animation-fill-mode: both;
+}
+.cs-shadow--top,
+.cs-shadow--bottom {
+   inset-inline: 0;
+   block-size: var(--cs-shadow-size);
+   animation-timeline: --cs-y;
+}
+.cs-shadow--top {
+   inset-block-start: 0;
+   background: linear-gradient(to bottom, var(--cs-shadow-color), transparent);
+   animation-name: cs-fade-in;
+   animation-range: 0px var(--cs-shadow-size);
+}
+.cs-shadow--bottom {
+   inset-block-end: 0;
+   background: linear-gradient(to top, var(--cs-shadow-color), transparent);
+   animation-name: cs-fade-out;
+   animation-range: calc(100% - var(--cs-shadow-size)) 100%;
+}
+.cs-shadow--start,
+.cs-shadow--end {
+   inset-block: 0;
+   inline-size: var(--cs-shadow-size);
+   animation-timeline: --cs-x;
+}
+.cs-shadow--start {
+   inset-inline-start: 0;
+   background: linear-gradient(to right, var(--cs-shadow-color), transparent);
+   animation-name: cs-fade-in;
+   animation-range: 0px var(--cs-shadow-size);
+}
+.cs-shadow--end {
+   inset-inline-end: 0;
+   background: linear-gradient(to left, var(--cs-shadow-color), transparent);
+   animation-name: cs-fade-out;
+   animation-range: calc(100% - var(--cs-shadow-size)) 100%;
+}
+.cs-shadow--start:dir(rtl) {
+   background: linear-gradient(to left, var(--cs-shadow-color), transparent);
+}
+.cs-shadow--end:dir(rtl) {
+   background: linear-gradient(to right, var(--cs-shadow-color), transparent);
+}
+@supports (animation-timeline: scroll()) and (timeline-scope: --cs) {
+   .cs-viewport {
+      scrollbar-width: none;
+      scroll-timeline:
+         --cs-y block,
+         --cs-x inline;
+   }
+   .cs-viewport::-webkit-scrollbar {
+      display: none;
+   }
+}
+@supports not ((animation-timeline: scroll()) and (timeline-scope: --cs)) {
+   .cs-track,
+   .cs-shadow {
+      display: none;
+   }
+   .cs-viewport {
+      scrollbar-width: thin;
+   }
+}
+@media (prefers-reduced-motion: reduce) {
+   .cs-track,
+   .cs-thumb {
+      transition: none;
+   }
+}
 
